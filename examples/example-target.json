@@ -1,0 +1,44 @@
+{
+    "elementFormDefault": "qualified",
+    "targetNamespace": "https://www.minfra.gba.gob.ar/sig_hidraulica/geoserver/dipsoh_postgis",
+    "targetPrefix": "dipsoh",
+    "featureTypes": [
+        {
+            "typeName": "hidro_dph",
+            "properties": [
+                {
+                    "name": "geom",
+                    "maxOccurs": 1,
+                    "minOccurs": 0,
+                    "nillable": true,
+                    "type": "gml:MultiLineString",
+                    "localType": "MultiLineString"
+                },
+                {
+                    "name": "refname",
+                    "maxOccurs": 1,
+                    "minOccurs": 0,
+                    "nillable": true,
+                    "type": "xsd:string",
+                    "localType": "string"
+                },
+                {
+                    "name": "origen",
+                    "maxOccurs": 1,
+                    "minOccurs": 0,
+                    "nillable": true,
+                    "type": "xsd:string",
+                    "localType": "string"
+                },
+                {
+                    "name": "clase",
+                    "maxOccurs": 1,
+                    "minOccurs": 0,
+                    "nillable": true,
+                    "type": "xsd:string",
+                    "localType": "string"
+                }
+            ]
+        }
+    ]
+}

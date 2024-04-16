@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:dipsoh="https://www.minfra.gba.gob.ar/sig_hidraulica/geoserver/dipsoh_postgis" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:wfs="http://www.opengis.net/wfs/2.0" elementFormDefault="qualified" targetNamespace="https://www.minfra.gba.gob.ar/sig_hidraulica/geoserver/dipsoh_postgis">
+  <xsd:import namespace="http://www.opengis.net/gml/3.2" schemaLocation="https://www.minfra.gba.gob.ar/sig_hidraulica/geoserver/schemas/gml/3.2.1/gml.xsd"/>
+  <xsd:complexType name="hidro_dphType">
+    <xsd:complexContent>
+      <xsd:extension base="gml:AbstractFeatureType">
+        <xsd:sequence>
+          <xsd:element maxOccurs="1" minOccurs="0" name="geom" nillable="true" type="gml:MultiCurvePropertyType"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="refname" nillable="true" type="xsd:string"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="origen" nillable="true" type="xsd:string"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="clase" nillable="true" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="hidro_dph" substitutionGroup="gml:AbstractFeature" type="dipsoh:hidro_dphType"/>
+</xsd:schema>
