@@ -16,8 +16,6 @@
    */
   const NAMESPACE_URIS = [
       null, 
-      'http://www.opengis.net/wfs',
-      'http://www.opengis.net/wfs/2.0',
       'http://www.opengis.net/gml',
       'http://www.opengis.net/gml/3.2',
       'http://www.w3.org/2001/XMLSchema'
@@ -29,14 +27,14 @@
    */
   // @ts-ignore
   const PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'complexType': xml_js.makeObjectPropertySetter(readComplexType),
+    'complexType': xml_js.makeObjectPropertyPusher(readComplexType),
     'import': xml_js.makeObjectPropertySetter(readImport),
-    'element': xml_js.makeObjectPropertySetter(readElement_)
+    'element': xml_js.makeObjectPropertyPusher(readElement_)
   });
 
   /**
    * @classdesc
-   * Format for reading WMS capabilities data
+   * Format for reading Describe Feature Type GML data
    *
    * @api
    */
@@ -53,7 +51,8 @@
       const describeFeatureTypeObject = xml_js.pushParseAndPop(
         {
           'elementFormDefault': node.getAttribute('elementFormDefault'),
-          'targetNamespace': node.getAttribute('targetNamespace')
+          'targetNamespace': node.getAttribute('targetNamespace'),
+          'targetPrefix': readTargetPrefix(node)
         },
         PARSERS,
         node,
@@ -75,7 +74,11 @@
       return {
         elementFormDefault: data.elementFormDefault,
         targetNamespace: data.targetNamespace,
-        featureTypes: data.complexType.complexContent.extension.sequence.map(e => e)
+        targetPrefix: data.targetPrefix,
+        featureTypes:  data.complexType.map( e => ({
+          typeName: data.element.name,
+          properties: e.complexContent.extension.sequence
+        }))
       }
     }
   }
@@ -121,8 +124,22 @@
    * @param {Array<*>} objectStack Object stack.
    * @return {Object|undefined} Capability object.
    */
-  function readComplexType(node, objectStack) {
+  function readComplexTypeContent(node, objectStack) {
     return xml_js.pushParseAndPop({}, COMPLEX_TYPE_PARSERS, node, objectStack);
+  }
+
+  /**
+   * @param {Element} node Node.
+   * @param {Array<*>} objectStack Object stack.
+   * @return {Object|undefined} Capability object.
+   */
+  function readComplexType(node, objectStack) {
+    const complexType = readComplexTypeContent(node, objectStack);
+    if (complexType) {
+      complexType['name'] = node.getAttribute('name');
+      return complexType;
+    }
+    return undefined;
   }
 
   /**
@@ -155,7 +172,7 @@
   /**
    * @param {Element} node Node.
    * @param {Array<*>} objectStack Object stack.
-   * @return {Object|undefined} Contact information object.
+   * @return {Object|undefined} Complex Content object.
    */
   function readComplexContent(node, objectStack) {
     return xml_js.pushParseAndPop({}, COMPLEX_CONTENT_PARSERS, node, objectStack);
@@ -164,7 +181,7 @@
   /**
    * @param {Element} node Node.
    * @param {Array<*>} objectStack Object stack.
-   * @return {Object|undefined} Contact person object.
+   * @return {Object|undefined} Extension object.
    */
   function readExtension(node, objectStack) {
     return xml_js.pushParseAndPop({}, EXTENSION_PARSERS, node, objectStack);
@@ -173,10 +190,25 @@
   /**
    * @param {Element} node Node.
    * @param {Array<*>} objectStack Object stack.
-   * @return {Object|undefined} Contact person object.
+   * @return {Array|undefined} Sequence array.
    */
   function readSequence(node, objectStack) {
     return xml_js.pushParseAndPop([], SEQUENCE_PARSERS, node, objectStack);
+  }
+
+  /**
+   * @param {Element} node Node.
+   * @return {string|undefined} Target Prefix.
+   */
+  function readTargetPrefix(node) {
+    const attributes = node.attributes;
+    let prefix = '';
+    for (let i = 0; i < attributes.length; i++) {
+      let attr = attributes[i].name.split(':')[1];
+      if (attr && !['xsd', 'xs', 'gml', 'wfs'].includes(attr)) {
+        prefix = attr;
+      }
+    }  return prefix;
   }
 
   /**
@@ -187,10 +219,9 @@
   function readElement(node, objectStack) {
     const elementObject = {
       'name': node.getAttribute('name'),
-      'units': node.getAttribute('units'),
-      'nillable': xsd_js.readBooleanString(node.getAttribute('unitSymbol')),
-      'minOccurs': Number(node.getAttribute('minOccurs')),
       'maxOccurs': Number(node.getAttribute('maxOccurs')),
+      'minOccurs': Number(node.getAttribute('minOccurs')),
+      'nillable': xsd_js.readBooleanString(node.getAttribute('nillable')),
       'type': node.getAttribute('type'),
       'localType': node.getAttribute('type').split(':')[1]
     };

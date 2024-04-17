@@ -26,14 +26,14 @@
   function parseInputFormated() {
     if (!raw.value) return;
     var parsedData = parser.readFormated(raw.value);
-    version.innerText = "(" + parsedData.version + ")";
+    version.innerText = "(formated)";
     parsed.value = JSON.stringify(parsedData, undefined, 4);
   }
 
   function parseInput() {
     if (!raw.value) return;
     var parsedData = parser.read(raw.value);
-    version.innerText = "(" + parsedData.version + ")";
+    version.innerText = "(literal)";
     parsed.value = JSON.stringify(parsedData, undefined, 4);
   }
 
@@ -45,7 +45,7 @@
     const xml = xhttp.responseText;
     if (xml) {
       raw.value = xml;
-      parseInput();
+      parseInputFormated();
     }
   }
   

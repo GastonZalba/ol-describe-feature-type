@@ -26,6 +26,9 @@ import DescribeFeatureType from 'ol-describe-feature-type';
 const parser = new DescribeFeatureType();
 
 const parsedCapabilities = parser.read(myDescribeFeatureTypeSource);
+// or
+const parsedCapabilities = parser.readFormated(myDescribeFeatureTypeSource);
+
 ```
 
 ## Changelog
