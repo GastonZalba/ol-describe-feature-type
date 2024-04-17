@@ -1,27 +1,20 @@
 (function () {
-  var parser = new WFSCapabilities();
+  var parser = new DescribeFeatureType();
 
   var parsed = document.getElementById("parsed");
   var raw = document.getElementById("raw");
   var version = document.getElementById("version");
 
-  var _200 = document.getElementById("200");
-  _200.onclick = () => {
-    loadExample("arba-2.0.0-getCapabilities.xml");
+  var _321 = document.getElementById("321");
+  _321.onclick = () => {
+    loadExample("example-3.2.1.xml");
   };
 
-  var _110 = document.getElementById("110");
-  _110.onclick = () => {
-    loadExample("arba-1.1.0-getCapabilities.xml");
-  };
-
-  var _100 = document.getElementById("100");
-  _100.onclick = () => {
-    loadExample("arba-1.0.0-getCapabilities.xml");
-  };
-
-  parseBtn = document.getElementById("parseBtn");
+  var parseBtn = document.getElementById("parseBtn");
   parseBtn.onclick = parseInput;
+
+  var parseFormatedBtn = document.getElementById("parseFromatedBtn");
+  parseFormatedBtn.onclick = parseInputFormated;
 
   var cleanBtn = document.getElementById("cleanBtn");
   cleanBtn.onclick = () => {
@@ -30,11 +23,18 @@
     version.innerText = "";
   };
 
+  function parseInputFormated() {
+    if (!raw.value) return;
+    var parsedData = parser.readFormated(raw.value);
+    version.innerText = "(" + parsedData.version + ")";
+    parsed.value = JSON.stringify(parsedData, undefined, 4);
+  }
+
   function parseInput() {
     if (!raw.value) return;
-    var parsedCapabilities = parser.read(raw.value);
-    version.innerText = "(" + parsedCapabilities.version + ")";
-    parsed.value = JSON.stringify(parsedCapabilities, undefined, 4);
+    var parsedData = parser.read(raw.value);
+    version.innerText = "(" + parsedData.version + ")";
+    parsed.value = JSON.stringify(parsedData, undefined, 4);
   }
 
   function loadExample(file) {
@@ -50,5 +50,5 @@
   }
   
   // load this example on init
-  loadExample("arba-2.0.0-getCapabilities.xml");
+  loadExample("example-3.2.1.xml");
 })();
