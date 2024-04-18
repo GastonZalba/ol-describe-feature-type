@@ -25,9 +25,10 @@ import DescribeFeatureType from 'ol-describe-feature-type';
 
 const parser = new DescribeFeatureType();
 
-const parsedCapabilities = parser.read(myDescribeFeatureTypeSource);
-// or
-const parsedCapabilities = parser.readFormated(myDescribeFeatureTypeSource);
+const parsedCapabilities = parser.read(describeFeatureTypeXML);
+
+// use ´readFormated´ to get an object emulating a native geoserver/mapserver json response
+const parsedCapabilities = parser.readFormated(describeFeatureTypeXML);
 
 ```
 

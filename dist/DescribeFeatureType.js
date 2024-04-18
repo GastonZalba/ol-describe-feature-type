@@ -15,10 +15,10 @@
    * @type {Array<null|string>}
    */
   const NAMESPACE_URIS = [
-      null, 
-      'http://www.opengis.net/gml',
-      'http://www.opengis.net/gml/3.2',
-      'http://www.w3.org/2001/XMLSchema'
+    null,
+    'http://www.opengis.net/gml',
+    'http://www.opengis.net/gml/3.2',
+    'http://www.w3.org/2001/XMLSchema',
   ];
 
   /**
@@ -29,7 +29,7 @@
   const PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
     'complexType': xml_js.makeObjectPropertyPusher(readComplexType),
     'import': xml_js.makeObjectPropertySetter(readImport),
-    'element': xml_js.makeObjectPropertyPusher(readElement_)
+    'element': xml_js.makeObjectPropertyPusher(readElement_),
   });
 
   /**
@@ -52,11 +52,11 @@
         {
           'elementFormDefault': node.getAttribute('elementFormDefault'),
           'targetNamespace': node.getAttribute('targetNamespace'),
-          'targetPrefix': readTargetPrefix(node)
+          'targetPrefix': readTargetPrefix(node),
         },
         PARSERS,
         node,
-        [],
+        []
       );
       return describeFeatureTypeObject ? describeFeatureTypeObject : null;
     }
@@ -65,21 +65,20 @@
      * Read the source document.
      *
      * @param {Document|Element|string} source The XML source.
-     * @return {Object} An object representing the source emulating a native json response.
+     * @return {Object} An object representing the source emulating a native geoserver/mapserver json response.
      * @api
      */
     readFormated(source) {
       const data = this.read(source);
-
       return {
         elementFormDefault: data.elementFormDefault,
         targetNamespace: data.targetNamespace,
         targetPrefix: data.targetPrefix,
-        featureTypes:  data.complexType.map( e => ({
-          typeName: data.element.name,
+        featureTypes: data.complexType.map((e) => ({
+          typeName: e.name.replace('Type', ''),
           properties: e.complexContent.extension.sequence
         }))
-      }
+      };
     }
   }
 
@@ -89,7 +88,7 @@
    */
   // @ts-ignore
   const COMPLEX_TYPE_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'complexContent': xml_js.makeObjectPropertySetter(readComplexContent)
+    'complexContent': xml_js.makeObjectPropertySetter(readComplexContent),
   });
 
   /**
@@ -107,7 +106,7 @@
    */
   // @ts-ignore
   const EXTENSION_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'sequence': xml_js.makeObjectPropertySetter(readSequence)
+    'sequence': xml_js.makeObjectPropertySetter(readSequence),
   });
 
   /**
@@ -116,7 +115,7 @@
    */
   // @ts-ignore
   const SEQUENCE_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'element': xml_js.makeArrayPusher(readElement)
+    'element': xml_js.makeArrayPusher(readElement),
   });
 
   /**
@@ -150,7 +149,7 @@
   function readImport(node, objectStack) {
     const importObject = {
       'namespace': node.getAttribute('namespace'),
-      'schemaLocation': node.getAttribute('schemaLocation')
+      'schemaLocation': node.getAttribute('schemaLocation'),
     };
     return importObject;
   }
@@ -164,7 +163,7 @@
     const elementObject = {
       'name': node.getAttribute('name'),
       'substitutionGroup': node.getAttribute('substitutionGroup'),
-      'type': node.getAttribute('type')
+      'type': node.getAttribute('type'),
     };
     return elementObject;
   }
@@ -204,11 +203,12 @@
     const attributes = node.attributes;
     let prefix = '';
     for (let i = 0; i < attributes.length; i++) {
-      let attr = attributes[i].name.split(':')[1];
+      const attr = attributes[i].name.split(':')[1];
       if (attr && !['xsd', 'xs', 'gml', 'wfs'].includes(attr)) {
         prefix = attr;
       }
-    }  return prefix;
+    }
+    return prefix;
   }
 
   /**
@@ -223,7 +223,7 @@
       'minOccurs': Number(node.getAttribute('minOccurs')),
       'nillable': xsd_js.readBooleanString(node.getAttribute('nillable')),
       'type': node.getAttribute('type'),
-      'localType': node.getAttribute('type').split(':')[1]
+      'localType': node.getAttribute('type').split(':')[1],
     };
     return elementObject;
   }
