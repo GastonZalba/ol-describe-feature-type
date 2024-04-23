@@ -1,6 +1,6 @@
 {
   "name": "ol-describe-feature-type",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Format for reading WFS Describe Feature Type data",
   "main": "lib/DescribeFeatureType.js",
   "module": "lib/DescribeFeatureType.js",

@@ -5,9 +5,12 @@
   var raw = document.getElementById("raw");
   var version = document.getElementById("version");
 
-  var _321 = document.getElementById("321");
-  _321.onclick = () => {
+  document.getElementById("321").onclick = () => {
     loadExample("example-3.2.1.xml");
+  };
+
+  document.getElementById("exception").onclick = () => {
+    loadExample("example-exception.xml");
   };
 
   var parseBtn = document.getElementById("parseBtn");

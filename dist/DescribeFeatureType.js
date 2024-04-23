@@ -15,10 +15,11 @@
    * @type {Array<null|string>}
    */
   const NAMESPACE_URIS = [
-      null, 
-      'http://www.opengis.net/gml',
-      'http://www.opengis.net/gml/3.2',
-      'http://www.w3.org/2001/XMLSchema'
+    null,
+    "http://www.opengis.net/gml",
+    "http://www.opengis.net/gml/3.2",
+    "http://www.w3.org/2001/XMLSchema",
+    "http://www.opengis.net/ows/1.1",
   ];
 
   /**
@@ -27,9 +28,10 @@
    */
   // @ts-ignore
   const PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'complexType': xml_js.makeObjectPropertyPusher(readComplexType),
-    'import': xml_js.makeObjectPropertySetter(readImport),
-    'element': xml_js.makeObjectPropertyPusher(readElement_)
+    complexType: xml_js.makeObjectPropertyPusher(readComplexType),
+    import: xml_js.makeObjectPropertySetter(readImport),
+    element: xml_js.makeObjectPropertyPusher(readElement_),
+    Exception: xml_js.makeObjectPropertyPusher(readException),
   });
 
   /**
@@ -48,15 +50,20 @@
      * @return {Object|null} Object
      */
     readFromNode(node) {
+      const isException = node.tagName === "ows:ExceptionReport";
       const describeFeatureTypeObject = xml_js.pushParseAndPop(
-        {
-          'elementFormDefault': node.getAttribute('elementFormDefault'),
-          'targetNamespace': node.getAttribute('targetNamespace'),
-          'targetPrefix': readTargetPrefix(node)
-        },
+        isException
+          ? {
+              version: node.getAttribute("version"),
+            }
+          : {
+              elementFormDefault: node.getAttribute("elementFormDefault"),
+              targetNamespace: node.getAttribute("targetNamespace"),
+              targetPrefix: readTargetPrefix(node),
+            },
         PARSERS,
         node,
-        [],
+        []
       );
       return describeFeatureTypeObject ? describeFeatureTypeObject : null;
     }
@@ -71,15 +78,24 @@
     readFormated(source) {
       const data = this.read(source);
 
-      return {
-        elementFormDefault: data.elementFormDefault,
-        targetNamespace: data.targetNamespace,
-        targetPrefix: data.targetPrefix,
-        featureTypes:  data.complexType.map( e => ({
-          typeName: data.element.name,
-          properties: e.complexContent.extension.sequence
-        }))
-      }
+      return data.Exception
+        ? {
+            version: data.version,
+            exceptions: data.Exception.map((e) => ({
+              code: e.exceptionCode,
+              locator: e.locator,
+              text: e.ExceptionText,
+            })),
+          }
+        : {
+            elementFormDefault: data.elementFormDefault,
+            targetNamespace: data.targetNamespace,
+            targetPrefix: data.targetPrefix,
+            featureTypes: data.complexType.map((e) => ({
+              typeName: data.element.name,
+              properties: e.complexContent.extension.sequence,
+            })),
+          };
     }
   }
 
@@ -89,7 +105,7 @@
    */
   // @ts-ignore
   const COMPLEX_TYPE_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'complexContent': xml_js.makeObjectPropertySetter(readComplexContent)
+    complexContent: xml_js.makeObjectPropertySetter(readComplexContent),
   });
 
   /**
@@ -98,7 +114,7 @@
    */
   // @ts-ignore
   const COMPLEX_CONTENT_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'extension': xml_js.makeObjectPropertySetter(readExtension),
+    extension: xml_js.makeObjectPropertySetter(readExtension),
   });
 
   /**
@@ -107,7 +123,7 @@
    */
   // @ts-ignore
   const EXTENSION_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'sequence': xml_js.makeObjectPropertySetter(readSequence)
+    sequence: xml_js.makeObjectPropertySetter(readSequence),
   });
 
   /**
@@ -116,8 +132,18 @@
    */
   // @ts-ignore
   const SEQUENCE_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
-    'element': xml_js.makeArrayPusher(readElement)
+    element: xml_js.makeArrayPusher(readElement),
   });
+
+  /**
+   * @const
+   * @type {Object<string, Object<string, import("ol/xml.js").Parser>>}
+   */
+  // @ts-ignore
+  const EXCEPTION_TEXT_PARSERS = xml_js.makeStructureNS(NAMESPACE_URIS, {
+    'ExceptionText': xml_js.makeObjectPropertySetter(xsd_js.readString),
+  });
+
 
   /**
    * @param {Element} node Node.
@@ -131,12 +157,21 @@
   /**
    * @param {Element} node Node.
    * @param {Array<*>} objectStack Object stack.
+   * @return {Object|undefined} Exception text object.
+   */
+  function readExceptionText(node, objectStack) {
+    return xml_js.pushParseAndPop({}, EXCEPTION_TEXT_PARSERS, node, objectStack);
+  }
+
+  /**
+   * @param {Element} node Node.
+   * @param {Array<*>} objectStack Object stack.
    * @return {Object|undefined} Capability object.
    */
   function readComplexType(node, objectStack) {
     const complexType = readComplexTypeContent(node, objectStack);
     if (complexType) {
-      complexType['name'] = node.getAttribute('name');
+      complexType["name"] = node.getAttribute("name");
       return complexType;
     }
     return undefined;
@@ -149,8 +184,8 @@
    */
   function readImport(node, objectStack) {
     const importObject = {
-      'namespace': node.getAttribute('namespace'),
-      'schemaLocation': node.getAttribute('schemaLocation')
+      namespace: node.getAttribute("namespace"),
+      schemaLocation: node.getAttribute("schemaLocation"),
     };
     return importObject;
   }
@@ -160,11 +195,27 @@
    * @param {Array<*>} objectStack Object stack.
    * @return {Object|undefined} Element object.
    */
+
+  function readException(node, objectStack) {
+    const exceptionObject = readExceptionText(node, objectStack);
+    if (exceptionObject) {
+      exceptionObject["exceptionCode"] = node.getAttribute("exceptionCode");
+      exceptionObject["locator"] = node.getAttribute("locator");
+      return exceptionObject;
+    }
+    return undefined;
+  }
+
+  /**
+   * @param {Element} node Node.
+   * @param {Array<*>} objectStack Object stack.
+   * @return {Object|undefined} Element object.
+   */
   function readElement_(node, objectStack) {
     const elementObject = {
-      'name': node.getAttribute('name'),
-      'substitutionGroup': node.getAttribute('substitutionGroup'),
-      'type': node.getAttribute('type')
+      name: node.getAttribute("name"),
+      substitutionGroup: node.getAttribute("substitutionGroup"),
+      type: node.getAttribute("type"),
     };
     return elementObject;
   }
@@ -202,13 +253,14 @@
    */
   function readTargetPrefix(node) {
     const attributes = node.attributes;
-    let prefix = '';
+    let prefix = "";
     for (let i = 0; i < attributes.length; i++) {
-      let attr = attributes[i].name.split(':')[1];
-      if (attr && !['xsd', 'xs', 'gml', 'wfs'].includes(attr)) {
+      const attr = attributes[i].name.split(":")[1];
+      if (attr && !["xsd", "xs", "gml", "wfs"].includes(attr)) {
         prefix = attr;
       }
-    }  return prefix;
+    }
+    return prefix;
   }
 
   /**
@@ -218,12 +270,12 @@
    */
   function readElement(node, objectStack) {
     const elementObject = {
-      'name': node.getAttribute('name'),
-      'maxOccurs': Number(node.getAttribute('maxOccurs')),
-      'minOccurs': Number(node.getAttribute('minOccurs')),
-      'nillable': xsd_js.readBooleanString(node.getAttribute('nillable')),
-      'type': node.getAttribute('type'),
-      'localType': node.getAttribute('type').split(':')[1]
+      name: node.getAttribute("name"),
+      maxOccurs: Number(node.getAttribute("maxOccurs")),
+      minOccurs: Number(node.getAttribute("minOccurs")),
+      nillable: xsd_js.readBooleanString(node.getAttribute("nillable")),
+      type: node.getAttribute("type"),
+      localType: node.getAttribute("type").split(":")[1],
     };
     return elementObject;
   }
