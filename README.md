@@ -27,8 +27,8 @@ const parser = new DescribeFeatureType();
 
 const parsedData = parser.read(describeFeatureTypeXML);
 
-// use ´readFormated´ to get an object emulating a native geoserver/mapserver json response
-const parsedDataFormated = parser.readFormated(describeFeatureTypeXML);
+// use ´readFormatted´ to get an object emulating a native geoserver/mapserver json response
+const parsedDataFormated = parser.readFormatted(describeFeatureTypeXML);
 
 ```
 

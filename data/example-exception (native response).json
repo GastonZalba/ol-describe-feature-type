@@ -1,0 +1,10 @@
+{
+    "version": "2.0.0",
+    "exceptions": [
+        {
+            "code": "InvalidParameterValue",
+            "locator": "outputFormat",
+            "text": "Failed to find response for output format text/xml"
+        }
+    ]
+}

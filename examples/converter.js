@@ -5,9 +5,12 @@
   var raw = document.getElementById("raw");
   var version = document.getElementById("version");
 
-  var _321 = document.getElementById("321");
-  _321.onclick = () => {
-    loadExample("example-3.2.1.xml");
+  document.getElementById("321").onclick = () => {
+    loadExample("data/example-3.2.1.xml");
+  };
+
+  document.getElementById("exception").onclick = () => {
+    loadExample("data/example-exception.xml");
   };
 
   var parseBtn = document.getElementById("parseBtn");
@@ -25,7 +28,7 @@
 
   function parseInputFormated() {
     if (!raw.value) return;
-    var parsedData = parser.readFormated(raw.value);
+    var parsedData = parser.readFormatted(raw.value);
     version.innerText = "(formated)";
     parsed.value = JSON.stringify(parsedData, undefined, 4);
   }
@@ -50,5 +53,5 @@
   }
   
   // load this example on init
-  loadExample("example-3.2.1.xml");
+  loadExample("data/example-3.2.1.xml");
 })();

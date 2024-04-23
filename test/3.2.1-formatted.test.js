@@ -7,14 +7,14 @@ import { resolve } from 'path';
 
 const parser = new DescribeFeatureType();
 
-describe("DescribeFeatureType Parser - GML version 3.2.1", () => {
+describe("DescribeFeatureType Parser - GML version 3.2.1 - FORMATED", () => {
 
-    const data = fs.readFileSync(resolve(__dirname, 'example-3.2.1.xml'), { encoding: 'utf-8' });
+    const data = fs.readFileSync(resolve('data/example-3.2.1.xml'), { encoding: 'utf-8' });
 
     let parsed;
 
     test("Open and parse", () => {
-        parsed = parser.readFormated(data);
+        parsed = parser.readFormatted(data);
         expect(Object.keys(parsed).length).toBeGreaterThan(1);
         fs.writeFileSync('test/example-3.2.1-formatted-parsed.json', JSON.stringify(parsed, undefined, 2), { encoding: 'utf-8' });
     });

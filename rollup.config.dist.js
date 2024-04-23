@@ -41,7 +41,7 @@ export default function (commandOptions) {
         serve({
           open: false,
           verbose: true,
-          contentBase: ['', 'examples'],
+          contentBase: ['', 'examples', 'data'],
           historyApiFallback: `/${commandOptions.example || 'converter'}.html`,
           host: 'localhost',
           port: 3009,

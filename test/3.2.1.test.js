@@ -9,7 +9,7 @@ const parser = new DescribeFeatureType();
 
 describe("DescribeFeatureType Parser - GML version 3.2.1", () => {
 
-    const data = fs.readFileSync(resolve(__dirname, 'example-3.2.1.xml'), { encoding: 'utf-8' });
+    const data = fs.readFileSync(resolve('data/example-3.2.1.xml'), { encoding: 'utf-8' });
 
     let parsed;
 
