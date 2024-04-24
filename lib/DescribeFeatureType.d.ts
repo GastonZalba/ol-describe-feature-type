@@ -13,7 +13,7 @@ declare class DescribeFeatureType extends XML {
      * @return {Object} An object representing the source emulating a native geoserver/mapserver json response.
      * @api
      */
-    readFormated(source: Document | Element | string): any;
+    readFormatted(source: Document | Element | string): any;
 }
 import XML from 'ol/format/XML.js';
 //# sourceMappingURL=DescribeFeatureType.d.ts.map
